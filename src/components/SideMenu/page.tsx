@@ -6,6 +6,8 @@ import { CONCURRENCY_LIMIT, asyncPool } from '@/utils/helpers';
 import { API } from '@/utils/api';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import Button from '@/components/Button/page';
+import Input from '@/components/Input/page';
 import Icon from '@/components/Icon/page';
 
 import xIconRaw from '@/assets/icons/x.svg';
@@ -225,23 +227,23 @@ export default function SideMenu() {
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Icon svg={bookmarkIconRaw} size={20} /> My Profiles
           </span>
-          <button onClick={closeMenu} className="icon-btn side-menu-close-btn">
+          <Button variant="icon" className="side-menu-close-btn" onClick={closeMenu}>
             <Icon svg={xIconRaw} size={20} />
-          </button>
+          </Button>
         </div>
         <div className="side-menu-content">
           <div className="save-profile-box">
             <label>Save Current Selection</label>
             <div className="input-group">
-              <input
+              <Input
+                variant="base"
                 type="text"
                 value={profileName}
                 onChange={e => setProfileName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && saveProfile()}
                 placeholder="Name (ex: RPG Pack)"
-                className="input-base"
               />
-              <button onClick={saveProfile} className="btn-primary">Save</button>
+              <Button onClick={saveProfile} variant="primary">Save</Button>
             </div>
             <p className="profile-msg">{profileMsg}</p>
           </div>
@@ -249,12 +251,12 @@ export default function SideMenu() {
           <div className="profile-list-header">
             <h3>Saved Profiles</h3>
             <div style={{ display: 'flex', gap: '0.25rem' }}>
-              <button onClick={() => importZipInputRef.current?.click()} className="btn-text-icon" title="Scan ZIP for Mods">
+              <Button onClick={() => importZipInputRef.current?.click()} variant="text-icon" title="Scan ZIP for Mods">
                 <Icon svg={fileArchiveIconRaw} size={12} /> ZIP
-              </button>
-              <button onClick={() => importInputRef.current?.click()} className="btn-text-icon" title="Import TXT">
+              </Button>
+              <Button onClick={() => importInputRef.current?.click()} variant="text-icon" title="Import TXT">
                 <Icon svg={importIconRaw} size={12} /> TXT
-              </button>
+              </Button>
             </div>
             <input type="file" ref={importInputRef} accept=".txt" style={{ display: 'none' }} onChange={importFile} />
             <input type="file" ref={importZipInputRef} accept=".zip" style={{ display: 'none' }} onChange={importZip} />
@@ -271,7 +273,8 @@ export default function SideMenu() {
                   <div className="profile-info">
                     {renamingIndex === i ? (
                       <div className="rename-input-group">
-                        <input
+                        <Input
+                          variant="base"
                           autoFocus
                           type="text"
                           value={renameValue}
@@ -280,11 +283,11 @@ export default function SideMenu() {
                             if (e.key === 'Enter') commitRename(i);
                             if (e.key === 'Escape') setRenamingIndex(null);
                           }}
-                          className="input-base rename-input"
+                          className="rename-input"
                         />
-                        <button onClick={() => commitRename(i)} className="btn-icon-small blue" title="Confirm Rename">
+                        <Button onClick={() => commitRename(i)} variant="icon-small" color="blue" title="Confirm Rename">
                           <Icon svg={checkIconRaw} size={14} />
-                        </button>
+                        </Button>
                       </div>
                     ) : (
                       <div className="profile-name">{p.name}</div>
@@ -292,18 +295,18 @@ export default function SideMenu() {
                     <div className="profile-date">{p.mods.length} mods • {p.date}</div>
                   </div>
                   <div className="profile-actions">
-                    <button onClick={() => loadProfile(i)} className="btn-icon-small blue" title="Load">
+                    <Button onClick={() => loadProfile(i)} variant="icon-small" color="blue" title="Load">
                       <Icon svg={uploadIconRaw} size={16} />
-                    </button>
-                    <button onClick={() => startRename(i)} className="btn-icon-small gray" title="Rename">
+                    </Button>
+                    <Button onClick={() => startRename(i)} variant="icon-small" color="gray" title="Rename">
                       <Icon svg={pencilIconRaw} size={16} />
-                    </button>
-                    <button onClick={() => exportProfile(i)} className="btn-icon-small gray" title="Export">
+                    </Button>
+                    <Button onClick={() => exportProfile(i)} variant="icon-small" color="gray" title="Export">
                       <Icon svg={shareIconRaw} size={16} />
-                    </button>
-                    <button onClick={() => deleteProfile(i)} className="btn-icon-small red" title="Delete">
+                    </Button>
+                    <Button onClick={() => deleteProfile(i)} variant="icon-small" color="red" title="Delete">
                       <Icon svg={trashIconRaw} size={16} />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))

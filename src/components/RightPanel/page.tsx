@@ -3,8 +3,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import ModDetail from '@/components/ModDetail/page';
+import Button from '@/components/Button/page';
+import EmptyState from '@/components/EmptyState/page';
+import LogEntry from '@/components/LogEntry/page';
+import Badge from '@/components/Badge/page';
+import RightPanelModItem from '@/components/RightPanelModItem/page';
+import { Panel, PanelTabs, PanelBody, PanelList, LogContainer } from '@/components/PanelComponents/page';
 import Icon from '@/components/Icon/page';
-import ModImage from '@/components/ModImage/page';
 import { API } from '@/utils/api';
 
 import fileTextIconRaw from '@/assets/icons/file-text.svg';
@@ -32,8 +37,8 @@ function UpperPanel({ onSettingsClick, onHistorySearch }: { onSettingsClick: () 
   ];
 
   return (
-    <div className="rp-panel">
-      <div className="rp-tabs">
+    <Panel>
+      <PanelTabs>
         {tabs.map(tb => (
           <button
             key={tb.id}
@@ -47,19 +52,19 @@ function UpperPanel({ onSettingsClick, onHistorySearch }: { onSettingsClick: () 
             <span>{tb.label}</span>
           </button>
         ))}
-      </div>
-      <div className="rp-panel-body">
+      </PanelTabs>
+      <PanelBody>
         {tab === 'description' && <ModDetail />}
         {tab === 'history' && (
           <div className="rp-history">
             {searchHistory.length === 0 ? (
-              <div className="rp-empty">{t.history.noHistory}</div>
+              <EmptyState variant="right-panel">{t.history.noHistory}</EmptyState>
             ) : (
               <>
                 <div className="rp-history-header">
-                  <button className="btn-small red-outline" onClick={clearSearchHistory}>
+                  <Button variant="small" color="red-outline" onClick={clearSearchHistory}>
                     <Icon svg={trashIconRaw} size={12} /> {t.history.clear}
-                  </button>
+                  </Button>
                 </div>
                 <div className="rp-history-list">
                   {searchHistory.map((q, i) => (
@@ -75,8 +80,8 @@ function UpperPanel({ onSettingsClick, onHistorySearch }: { onSettingsClick: () 
             )}
           </div>
         )}
-      </div>
-    </div>
+      </PanelBody>
+    </Panel>
   );
 }
 
@@ -124,105 +129,98 @@ function LowerPanel() {
   const counts = debugLogs.reduce<Record<string, number>>((acc, e) => { acc[e.level] = (acc[e.level] || 0) + 1; return acc; }, {});
 
   return (
-    <div className="rp-panel">
-      <div className="rp-tabs">
+    <Panel>
+      <PanelTabs>
         {tabs.map(tb => (
           <button key={tb.id} className={`rp-tab-btn ${tab === tb.id ? 'active' : ''}`} onClick={() => setTab(tb.id)}>
             <Icon svg={tb.icon} size={14} />
             <span>{tb.label}</span>
             {tb.id === 'selected' && selectedMods.size > 0 && (
-              <span className="rp-count-badge">{selectedMods.size}</span>
+              <Badge variant="rp">{selectedMods.size}</Badge>
             )}
             {tb.id === 'favorites' && favorites.size > 0 && (
-              <span className="rp-count-badge">{favorites.size}</span>
+              <Badge variant="rp">{favorites.size}</Badge>
             )}
           </button>
         ))}
-      </div>
-      <div className="rp-panel-body">
+      </PanelTabs>
+      <PanelBody>
         {tab === 'selected' && (
-          <div className="rp-selected-list">
+          <PanelList>
             {selectedIds.length === 0 ? (
-              <div className="rp-empty">No mods selected.</div>
+              <EmptyState variant="right-panel">No mods selected.</EmptyState>
             ) : (
               selectedIds.map(id => {
                 const mod = modDataMap[id];
                 return (
-                  <div key={id} className="rp-mod-item">
-                    <ModImage src={(mod?.icon_url as string) || FALLBACK_ICON} width={28} height={28} className="rp-mod-icon" alt="icon" />
-                    <span className="rp-mod-title">{(mod?.title as string) || id}</span>
-                    <button onClick={() => removeMod(id)} className="btn-small red-outline">
+                  <RightPanelModItem key={id} iconUrl={(mod?.icon_url as string) || FALLBACK_ICON} title={(mod?.title as string) || id}>
+                    <Button onClick={() => removeMod(id)} variant="small" color="red-outline">
                       <Icon svg={xIconRaw} size={10} />
-                    </button>
-                  </div>
+                    </Button>
+                  </RightPanelModItem>
                 );
               })
             )}
-          </div>
+          </PanelList>
         )}
         {tab === 'favorites' && (
-          <div className="rp-selected-list">
+          <PanelList>
             {favIds.length === 0 ? (
-              <div className="rp-empty">{t.favorites.noFavorites}</div>
+              <EmptyState variant="right-panel">{t.favorites.noFavorites}</EmptyState>
             ) : (
               favIds.map(id => {
                 const mod = modDataMap[id];
                 const isSel = selectedMods.has(id);
                 return (
-                  <div key={id} className="rp-mod-item">
-                    <ModImage src={(mod?.icon_url as string) || FALLBACK_ICON} width={28} height={28} className="rp-mod-icon" alt="icon" />
-                    <span className="rp-mod-title">{(mod?.title as string) || id}</span>
-                    <button
+                  <RightPanelModItem key={id} iconUrl={(mod?.icon_url as string) || FALLBACK_ICON} title={(mod?.title as string) || id}>
+                    <Button
+                      variant="small"
+                      color={isSel ? 'red-outline' : 'green'}
                       onClick={() => isSel ? removeMod(id) : addMod(id)}
-                      className={`btn-small ${isSel ? 'red-outline' : 'green'}`}
                       title={isSel ? t.favorites.removeFromSelected : t.favorites.addToSelected}
                     >
                       <Icon svg={isSel ? xIconRaw : plusIconRaw} size={10} />
-                    </button>
-                    <button onClick={() => toggleFavorite(id)} className="btn-small rp-fav-mod-star" title="Remove from favorites">
+                    </Button>
+                    <Button variant="small" className="rp-fav-mod-star" onClick={() => toggleFavorite(id)} title="Remove from favorites">
                       <Icon svg={starIconRaw} size={10} />
-                    </button>
-                  </div>
+                    </Button>
+                  </RightPanelModItem>
                 );
               })
             )}
-          </div>
+          </PanelList>
         )}
         {tab === 'console' && debugMode && (
           <div className="rp-console">
             <div className="rp-console-toolbar">
               <div style={{ display: 'flex', gap: '0.25rem' }}>
                 {LEVELS.map(lvl => (
-                  <button
+                  <Button
                     key={lvl}
                     className={`debug-filter-btn ${filterLevel === lvl ? 'active' : ''}`}
                     style={filterLevel === lvl && lvl !== 'all' ? { borderColor: LEVEL_COLORS[lvl], color: LEVEL_COLORS[lvl] } : {}}
                     onClick={() => setFilterLevel(lvl)}
                   >
                     {lvl === 'all' ? 'All' : lvl.charAt(0).toUpperCase() + lvl.slice(1)}
-                    {lvl !== 'all' && counts[lvl] ? <span className="debug-filter-count">{counts[lvl]}</span> : null}
-                  </button>
+                    {lvl !== 'all' && counts[lvl] ? <Badge variant="debug">{counts[lvl]}</Badge> : null}
+                  </Button>
                 ))}
               </div>
-              <button onClick={clearDebugLogs} className="debug-action-btn" title="Clear">
+              <Button onClick={clearDebugLogs} className="debug-action-btn" title="Clear">
                 <Icon svg={trashIconRaw} size={12} />
-              </button>
+              </Button>
             </div>
-            <div ref={logsRef} className="rp-console-logs debug-logs">
+            <LogContainer refObj={logsRef} className="rp-console-logs">
               {filteredLogs.length === 0 ? (
-                <div className="debug-empty">No logs.</div>
+                <EmptyState variant="debug">No logs.</EmptyState>
               ) : filteredLogs.map((entry, i) => (
-                <div key={i} className={`log-entry log-${entry.level}`}>
-                  <span className="log-time">{entry.time}</span>
-                  <span className="log-level-badge">{entry.level.toUpperCase()}</span>
-                  <span className="log-msg">{entry.msg}</span>
-                </div>
+                <LogEntry key={i} time={entry.time} level={entry.level} msg={entry.msg} />
               ))}
-            </div>
+            </LogContainer>
           </div>
         )}
-      </div>
-    </div>
+      </PanelBody>
+    </Panel>
   );
 }
 

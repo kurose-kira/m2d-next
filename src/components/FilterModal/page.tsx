@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useApp } from '@/contexts/AppContext';
 import { LOADER_OPTIONS, CATEGORY_OPTIONS, OTHER_FILTER_OPTIONS } from '@/utils/helpers';
 import { API } from '@/utils/api';
+import Modal from '@/components/Modal/page';
+import Button from '@/components/Button/page';
 import CustomSelect from '@/components/CustomSelect/page';
 import Icon from '@/components/Icon/page';
+import CategoryBlock from '@/components/CategoryBlock/page';
+import FilterRow from '@/components/FilterRow/page';
 
 import listFilterIconRaw from '@/assets/icons/list-filter.svg';
-import xIconRaw from '@/assets/icons/x.svg';
 
 import fabricIconRaw from '@/assets/icons/tags/loaders/fabric.svg';
 import forgeIconRaw from '@/assets/icons/tags/loaders/forge.svg';
@@ -144,119 +146,92 @@ export default function FilterModal({ filters, onApply, onClose, sort }: FilterM
 
   if (!mounted) return null;
 
-  return createPortal(
-    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-container">
-        <div className="modal-header">
-          <h3 className="modal-title">
-            <Icon svg={listFilterIconRaw} size={20} className="filter-btn-icon" />
-            {t.filters.title}
-          </h3>
-          <button onClick={onClose} className="btn-close-modal">
-            <Icon svg={xIconRaw} size={20} />
-          </button>
-        </div>
-        <div className="modal-body">
-          <div className="filter-category">
-            <h4 className="filter-category-title">{t.filters.version}</h4>
-            <CustomSelect
-              options={[
-                { value: '', label: t.filters.versionAny || 'Any' },
-                ...gameVersions.map(v => ({ value: v.version, label: v.version })),
-              ]}
-              value={pending.version || ''}
-              onChange={v => setPending(prev => ({ ...prev, version: v }))}
-            />
-          </div>
-          <div className="filter-category">
-            <h4 className="filter-category-title">{t.sort.label}</h4>
-            <CustomSelect options={sortOptions} value={pendingSort} onChange={setPendingSort} />
-          </div>
-          <div className="filter-category">
-            <h4 className="filter-category-title">{t.filters.loader}</h4>
-            <div className="filter-items">
-              {LOADER_OPTIONS.map(({ value, label }) => {
-                const iconSvg = LOADER_ICON_PATHS[value];
-                return (
-                  <div key={value} className="filter-item-row">
-                    <span className="filter-item-label">
-                      {iconSvg && <Icon svg={iconSvg} size={16} className="loader-icon-img" />}
-                      {label}
-                    </span>
-                    <div className="filter-item-btns">
-                      <button className={`btn-filter-state${pending.loaders[value] === 'include' ? ' active-include' : ''}`} onClick={() => toggleLoaderState(value, 'include')}>{t.filters.include}</button>
-                      <button className={`btn-filter-state${pending.loaders[value] === 'exclude' ? ' active-exclude' : ''}`} onClick={() => toggleLoaderState(value, 'exclude')}>{t.filters.exclude}</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div className="filter-category">
-            <h4 className="filter-category-title">{t.filters.categories}</h4>
-            <div className="filter-items">
-              {CATEGORY_OPTIONS.map(({ value, labelKey }) => {
-                const label = t.categories[labelKey as keyof typeof t.categories];
-                const iconSvg = CATEGORY_ICON_MAP[value];
-                return (
-                  <div key={value} className="filter-item-row">
-                    <span className="filter-item-label">
-                      {iconSvg && <Icon svg={iconSvg} size={16} className="category-icon-img" />}
-                      {label}
-                    </span>
-                    <div className="filter-item-btns">
-                      <button className={`btn-filter-state${pending.categories[value] === 'include' ? ' active-include' : ''}`} onClick={() => toggleCategoryState(value, 'include')}>{t.filters.include}</button>
-                      <button className={`btn-filter-state${pending.categories[value] === 'exclude' ? ' active-exclude' : ''}`} onClick={() => toggleCategoryState(value, 'exclude')}>{t.filters.exclude}</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div className="filter-category">
-            <h4 className="filter-category-title">{t.filters.environment}</h4>
-            <div className="filter-items">
-              <div className="filter-item-row">
-                <span className="filter-item-label">{t.filters.clientSide}</span>
-                <div className="filter-item-btns">
-                  <button className={`btn-filter-state${pending.environment.client_side === 'include' ? ' active-include' : ''}`} onClick={() => toggleEnvironmentState('client_side', 'include')}>{t.filters.include}</button>
-                  <button className={`btn-filter-state${pending.environment.client_side === 'exclude' ? ' active-exclude' : ''}`} onClick={() => toggleEnvironmentState('client_side', 'exclude')}>{t.filters.exclude}</button>
-                </div>
-              </div>
-              <div className="filter-item-row">
-                <span className="filter-item-label">{t.filters.serverSide}</span>
-                <div className="filter-item-btns">
-                  <button className={`btn-filter-state${pending.environment.server_side === 'include' ? ' active-include' : ''}`} onClick={() => toggleEnvironmentState('server_side', 'include')}>{t.filters.include}</button>
-                  <button className={`btn-filter-state${pending.environment.server_side === 'exclude' ? ' active-exclude' : ''}`} onClick={() => toggleEnvironmentState('server_side', 'exclude')}>{t.filters.exclude}</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="filter-category" style={{ marginBottom: 0 }}>
-            <h4 className="filter-category-title">{t.filters.other}</h4>
-            <div className="filter-items">
-              {OTHER_FILTER_OPTIONS.map(({ value, labelKey }) => {
-                const label = t.filters[labelKey as keyof typeof t.filters];
-                return (
-                  <div key={value} className="filter-item-row">
-                    <span className="filter-item-label">{label}</span>
-                    <div className="filter-item-btns">
-                      <button className={`btn-filter-state${pending.other[value] === 'include' ? ' active-include' : ''}`} onClick={() => toggleOtherState(value, 'include')}>{t.filters.include}</button>
-                      <button className={`btn-filter-state${pending.other[value] === 'exclude' ? ' active-exclude' : ''}`} onClick={() => toggleOtherState(value, 'exclude')}>{t.filters.exclude}</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-        <div className="modal-footer">
-          <button onClick={handleUndo} className="btn-secondary">{t.filters.undo}</button>
-          <button onClick={handleApply} className="btn-secondary">{t.filters.apply}</button>
-          <button onClick={handleDone} className="btn-primary" style={{ height: '2.25rem', padding: '0 1rem' }}>{t.filters.done}</button>
-        </div>
-      </div>
-    </div>,
-    document.body
+  const title = (
+    <>
+      <Icon svg={listFilterIconRaw} size={20} className="filter-btn-icon" />
+      {t.filters.title}
+    </>
+  );
+
+  const footer = (
+    <>
+      <Button onClick={handleUndo} variant="secondary">{t.filters.undo}</Button>
+      <Button onClick={handleApply} variant="secondary">{t.filters.apply}</Button>
+      <Button onClick={handleDone} variant="primary" style={{ height: '2.25rem', padding: '0 1rem' }}>{t.filters.done}</Button>
+    </>
+  );
+
+  return (
+    <Modal onClose={onClose} title={title} footer={footer} portal>
+      <CategoryBlock title={t.filters.version} noItemsWrapper>
+        <CustomSelect
+          options={[
+            { value: '', label: t.filters.versionAny || 'Any' },
+            ...gameVersions.map(v => ({ value: v.version, label: v.version })),
+          ]}
+          value={pending.version || ''}
+          onChange={v => setPending(prev => ({ ...prev, version: v }))}
+        />
+      </CategoryBlock>
+      <CategoryBlock title={t.sort.label} noItemsWrapper>
+        <CustomSelect options={sortOptions} value={pendingSort} onChange={setPendingSort} />
+      </CategoryBlock>
+      <CategoryBlock title={t.filters.loader}>
+        {LOADER_OPTIONS.map(({ value, label }) => (
+          <FilterRow
+            key={value}
+            label={label}
+            iconSvg={LOADER_ICON_PATHS[value]}
+            iconClassName="loader-icon-img"
+            state={pending.loaders[value]}
+            onToggle={(state) => toggleLoaderState(value, state)}
+            includeLabel={t.filters.include}
+            excludeLabel={t.filters.exclude}
+          />
+        ))}
+      </CategoryBlock>
+      <CategoryBlock title={t.filters.categories}>
+        {CATEGORY_OPTIONS.map(({ value, labelKey }) => (
+          <FilterRow
+            key={value}
+            label={t.categories[labelKey as keyof typeof t.categories]}
+            iconSvg={CATEGORY_ICON_MAP[value]}
+            iconClassName="category-icon-img"
+            state={pending.categories[value]}
+            onToggle={(state) => toggleCategoryState(value, state)}
+            includeLabel={t.filters.include}
+            excludeLabel={t.filters.exclude}
+          />
+        ))}
+      </CategoryBlock>
+      <CategoryBlock title={t.filters.environment}>
+        <FilterRow
+          label={t.filters.clientSide}
+          state={pending.environment.client_side}
+          onToggle={(state) => toggleEnvironmentState('client_side', state)}
+          includeLabel={t.filters.include}
+          excludeLabel={t.filters.exclude}
+        />
+        <FilterRow
+          label={t.filters.serverSide}
+          state={pending.environment.server_side}
+          onToggle={(state) => toggleEnvironmentState('server_side', state)}
+          includeLabel={t.filters.include}
+          excludeLabel={t.filters.exclude}
+        />
+      </CategoryBlock>
+      <CategoryBlock title={t.filters.other} style={{ marginBottom: 0 }}>
+        {OTHER_FILTER_OPTIONS.map(({ value, labelKey }) => (
+          <FilterRow
+            key={value}
+            label={t.filters[labelKey as keyof typeof t.filters]}
+            state={pending.other[value]}
+            onToggle={(state) => toggleOtherState(value, state)}
+            includeLabel={t.filters.include}
+            excludeLabel={t.filters.exclude}
+          />
+        ))}
+      </CategoryBlock>
+    </Modal>
   );
 }

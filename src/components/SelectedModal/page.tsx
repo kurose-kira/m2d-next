@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { API } from '@/utils/api';
+import Modal from '@/components/Modal/page';
+import Button from '@/components/Button/page';
+import EmptyState from '@/components/EmptyState/page';
 import Icon from '@/components/Icon/page';
 import ModImage from '@/components/ModImage/page';
 import checkCircleIconRaw from '@/assets/icons/check-circle.svg';
-import xIconRaw from '@/assets/icons/x.svg';
 
 const FALLBACK_ICON = 'https://cdn.modrinth.com/assets/unknown_server.png';
 
@@ -41,44 +43,40 @@ export default function SelectedModal() {
   if (!selectedModalOpen) return null;
 
   const ids = Array.from(selectedMods);
+  const onClose = () => setSelectedModalOpen(false);
+
+  const title = (
+    <>
+      <Icon svg={checkCircleIconRaw} size={20} /> Selected Mods
+    </>
+  );
+
+  const footer = (
+    <Button onClick={onClose} variant="secondary">Close</Button>
+  );
 
   return (
-    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelectedModalOpen(false)}>
-      <div className="modal-container large">
-        <div className="modal-header">
-          <h3 className="modal-title" style={{ color: 'var(--primary-color)' }}>
-            <Icon svg={checkCircleIconRaw} size={20} /> Selected Mods
-          </h3>
-          <button onClick={() => setSelectedModalOpen(false)} className="btn-close-modal">
-            <Icon svg={xIconRaw} size={20} />
-          </button>
+    <Modal onClose={onClose} title={title} footer={footer} large>
+      {ids.length === 0 ? (
+        <EmptyState>No mods selected.</EmptyState>
+      ) : loadingDetails ? (
+        <EmptyState style={{ color: 'var(--text-muted)' }}>Loading details...</EmptyState>
+      ) : (
+        <div className="selected-list">
+          {ids.map(id => {
+            const mod = modDataMap[id];
+            const modTitle = mod?.title || id;
+            const iconUrl = mod?.icon_url || FALLBACK_ICON;
+            return (
+              <div key={id} className="selected-item">
+                <ModImage src={iconUrl as string} width={32} height={32} className="selected-item-icon" alt="icon" />
+                <span className="selected-item-title">{modTitle as string}</span>
+                <Button onClick={() => removeMod(id)} variant="small" color="red-outline">Remove</Button>
+              </div>
+            );
+          })}
         </div>
-        <div className="modal-body">
-          {ids.length === 0 ? (
-            <div className="empty-state">No mods selected.</div>
-          ) : loadingDetails ? (
-            <div className="empty-state" style={{ color: 'var(--text-muted)' }}>Loading details...</div>
-          ) : (
-            <div className="selected-list">
-              {ids.map(id => {
-                const mod = modDataMap[id];
-                const title = mod?.title || id;
-                const iconUrl = mod?.icon_url || FALLBACK_ICON;
-                return (
-                  <div key={id} className="selected-item">
-                    <ModImage src={iconUrl as string} width={32} height={32} className="selected-item-icon" alt="icon" />
-                    <span className="selected-item-title">{title as string}</span>
-                    <button onClick={() => removeMod(id)} className="btn-small red-outline">Remove</button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-        <div className="modal-footer">
-          <button onClick={() => setSelectedModalOpen(false)} className="btn-secondary">Close</button>
-        </div>
-      </div>
-    </div>
+      )}
+    </Modal>
   );
 }

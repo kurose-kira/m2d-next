@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import FilterModal from '@/components/FilterModal/page';
+import Button from '@/components/Button/page';
+import Input from '@/components/Input/page';
 import Icon from '@/components/Icon/page';
 import { LOADER_OPTIONS, CATEGORY_OPTIONS, OTHER_FILTER_OPTIONS } from '@/utils/helpers';
 
@@ -80,26 +82,27 @@ export default function SearchSection({ onSearch }: SearchSectionProps) {
   return (
     <section className="search-section">
       <div className="search-bar">
-        <button
+        <Button
           className="btn-filters"
           onClick={() => setFilterModalOpen(true)}
         >
           <Icon svg={listFilterIconRaw} size={16} className="filter-btn-icon" />
           {t.filters.label}
           {hasActiveFilters(filters, sort) && <span className="filter-active-dot" />}
-        </button>
-        <input
+        </Button>
+        <Input
+          variant="large"
           type="text"
           value={query}
           onChange={handleQueryChange}
           onKeyDown={!fastSearch ? handleKeyPress : undefined}
           placeholder={t.search.placeholder}
-          className="input-large search-input"
+          className="search-input"
         />
         {!fastSearch && (
-          <button onClick={() => doSearch()} className="btn-search">
+          <Button onClick={() => doSearch()} variant="search">
             <Icon svg={searchIconRaw} size={20} />
-          </button>
+          </Button>
         )}
       </div>
       {filterModalOpen && (

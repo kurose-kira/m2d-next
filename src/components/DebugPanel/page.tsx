@@ -2,6 +2,11 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
+import Button from '@/components/Button/page';
+import EmptyState from '@/components/EmptyState/page';
+import LogEntry from '@/components/LogEntry/page';
+import Badge from '@/components/Badge/page';
+import { LogContainer } from '@/components/PanelComponents/page';
 import Icon from '@/components/Icon/page';
 import terminalIconRaw from '@/assets/icons/terminal-square.svg';
 import trashIconRaw from '@/assets/icons/trash.svg';
@@ -136,49 +141,45 @@ export default function DebugPanel() {
             <span className="debug-count">({filteredLogs.length}{filterLevel !== 'all' ? ` ${filterLevel}` : ''})</span>
           </span>
           <div className="debug-actions">
-            <button
+            <Button
               onClick={e => { e.stopPropagation(); copyLogs(); }}
               title="Copy Logs"
               className="debug-action-btn"
             >
               {copied ? <span style={{ fontSize: '0.625rem', color: '#4ade80' }}>Copied!</span> : <Icon svg={copyIconRaw} size={14} />}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={e => { e.stopPropagation(); clearDebugLogs(); }}
               title="Clear Console"
               className="debug-action-btn"
             >
               <Icon svg={trashIconRaw} size={14} />
-            </button>
-            <button className="debug-action-btn"><Icon svg={chevronDownIconRaw} size={14} /></button>
+            </Button>
+            <Button className="debug-action-btn"><Icon svg={chevronDownIconRaw} size={14} /></Button>
           </div>
         </div>
         <div className="debug-filter-bar" onClick={e => e.stopPropagation()}>
           {LEVELS.map(lvl => (
-            <button
+            <Button
               key={lvl}
               onClick={() => setFilterLevel(lvl)}
               className={`debug-filter-btn ${filterLevel === lvl ? 'active' : ''}`}
               style={filterLevel === lvl && lvl !== 'all' ? { borderColor: LEVEL_COLORS[lvl], color: LEVEL_COLORS[lvl] } : {}}
             >
               {LEVEL_LABELS[lvl]}
-              {lvl !== 'all' && counts[lvl] ? <span className="debug-filter-count">{counts[lvl]}</span> : null}
-            </button>
+              {lvl !== 'all' && counts[lvl] ? <Badge variant="debug">{counts[lvl]}</Badge> : null}
+            </Button>
           ))}
         </div>
-        <div ref={logsRef} className="debug-logs">
+        <LogContainer refObj={logsRef}>
           {filteredLogs.length === 0 ? (
-            <div className="debug-empty">No {filterLevel !== 'all' ? filterLevel : ''} logs yet.</div>
+            <EmptyState variant="debug">No {filterLevel !== 'all' ? filterLevel : ''} logs yet.</EmptyState>
           ) : (
             filteredLogs.map((entry, i) => (
-              <div key={i} className={`log-entry log-${entry.level}`}>
-                <span className="log-time">{entry.time}</span>
-                <span className="log-level-badge">{entry.level.toUpperCase()}</span>
-                <span className="log-msg">{entry.msg}</span>
-              </div>
+              <LogEntry key={i} time={entry.time} level={entry.level} msg={entry.msg} />
             ))
           )}
-        </div>
+        </LogContainer>
       </div>
     </>
   );

@@ -5,6 +5,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useApp } from '@/contexts/AppContext';
 import { API } from '@/utils/api';
+import Button from '@/components/Button/page';
+import EmptyState from '@/components/EmptyState/page';
+import LoaderDots from '@/components/LoaderDots/page';
 import Icon from '@/components/Icon/page';
 import ModImage from '@/components/ModImage/page';
 import externalLinkIconRaw from '@/assets/icons/arrow-up-right.svg';
@@ -33,19 +36,17 @@ export default function ModDetail() {
 
   if (!activeModId) {
     return (
-      <div className="mod-detail-empty">
+      <EmptyState variant="mod-detail">
         <p>{t.rightPanel.noDescription}</p>
-      </div>
+      </EmptyState>
     );
   }
 
   if (loading) {
     return (
-      <div className="mod-detail-empty">
-        <div className="loader-dots" style={{ position: 'relative', width: '5rem', height: '1.25rem' }}>
-          <div /><div /><div /><div />
-        </div>
-      </div>
+      <EmptyState variant="mod-detail">
+        <LoaderDots style={{ position: 'relative', width: '5rem', height: '1.25rem' }} />
+      </EmptyState>
     );
   }
 
@@ -81,9 +82,9 @@ export default function ModDetail() {
               <Icon svg={externalLinkIconRaw} size={12} /> {t.rightPanel.openModrinth}
             </a>
             {gallery.length > 0 && (
-              <button className="btn-small" onClick={scrollToGallery}>
+              <Button onClick={scrollToGallery} variant="small">
                 <Icon svg={imageIconRaw} size={12} /> {t.rightPanel.gallery} ({gallery.length})
-              </button>
+              </Button>
             )}
           </div>
         </div>

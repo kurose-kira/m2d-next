@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
+import Modal from '@/components/Modal/page';
+import Button from '@/components/Button/page';
+import EmptyState from '@/components/EmptyState/page';
 import Icon from '@/components/Icon/page';
 import ModImage from '@/components/ModImage/page';
 import gitGraphIconRaw from '@/assets/icons/git-graph.svg';
-import xIconRaw from '@/assets/icons/x.svg';
 import checkCircleIconRaw from '@/assets/icons/check-circle.svg';
 import infoIconRaw from '@/assets/icons/info.svg';
 
@@ -40,74 +42,71 @@ export default function DependencyModal({ issues, onClose }: DependencyModalProp
     const msgs: Record<string, string> = { required: 'All good! 🎉', optional: 'No optional deps.', conflict: 'No conflicts! ✅' };
     const iconSvg = activeTab === 'conflict' ? checkCircleIconRaw : infoIconRaw;
     return (
-      <div className="empty-state">
+      <EmptyState>
         <Icon svg={iconSvg} size={40} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
         <p>{msgs[activeTab]}</p>
-      </div>
+      </EmptyState>
     );
   };
 
+  const title = (
+    <>
+      <Icon svg={gitGraphIconRaw} size={20} /> Dependency Report
+    </>
+  );
+
+  const footer = (
+    <Button onClick={onClose} variant="secondary">Close</Button>
+  );
+
   return (
-    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-container large">
-        <div className="modal-header">
-          <h3 className="modal-title" style={{ color: 'var(--accent-color)' }}>
-            <Icon svg={gitGraphIconRaw} size={20} /> Dependency Report
-          </h3>
-          <button onClick={onClose} className="btn-close-modal"><Icon svg={xIconRaw} size={20} /></button>
-        </div>
-        <div className="tabs">
-          {['required', 'optional', 'conflict'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`tab-btn ${activeTab === tab ? `active-${tab}` : ''}`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-        <div className="modal-body">
-          {list.length === 0 ? renderEmptyState() : (
-            <div className="dep-list">
-              {list.map((item, i) => {
-                const isSelected = selectedMods.has(item.targetId);
-                const targetMod = modDataMap[item.targetId];
-                const targetTitle = (targetMod?.title as string) || item.targetId;
-                const iconUrl = (targetMod?.icon_url as string) || FALLBACK_ICON;
-
-                let actionBtn: React.ReactNode;
-                if (activeTab === 'conflict') {
-                  actionBtn = !isSelected
-                    ? <button className="btn-small disabled" disabled>Removed</button>
-                    : <button onClick={() => removeMod(item.targetId)} className="btn-small red-outline">Remove</button>;
-                } else {
-                  actionBtn = isSelected
-                    ? <button className="btn-small disabled" disabled>Added</button>
-                    : <button onClick={() => addMod(item.targetId)} className="btn-small green">Add</button>;
-                }
-
-                return (
-                  <div key={i} className="dep-item">
-                    <ModImage src={iconUrl} width={40} height={40} className="dep-icon" alt="icon" />
-                    <div className="dep-info">
-                      <p className="dep-source">
-                        {activeTab === 'conflict' ? 'Conflict w/' : 'Source:'}{' '}
-                        <span>{item.source}</span>
-                      </p>
-                      <p className="dep-target">{targetTitle}</p>
-                    </div>
-                    <div>{actionBtn}</div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-        <div className="modal-footer">
-          <button onClick={onClose} className="btn-secondary">Close</button>
-        </div>
+    <Modal onClose={onClose} title={title} footer={footer} large>
+      <div className="tabs">
+        {['required', 'optional', 'conflict'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`tab-btn ${activeTab === tab ? `active-${tab}` : ''}`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
       </div>
-    </div>
+      {list.length === 0 ? renderEmptyState() : (
+        <div className="dep-list">
+          {list.map((item, i) => {
+            const isSelected = selectedMods.has(item.targetId);
+            const targetMod = modDataMap[item.targetId];
+            const targetTitle = (targetMod?.title as string) || item.targetId;
+            const iconUrl = (targetMod?.icon_url as string) || FALLBACK_ICON;
+
+            let actionBtn: React.ReactNode;
+            if (activeTab === 'conflict') {
+              actionBtn = !isSelected
+                ? <Button variant="small" className="disabled" disabled>Removed</Button>
+                : <Button onClick={() => removeMod(item.targetId)} variant="small" color="red-outline">Remove</Button>;
+            } else {
+              actionBtn = isSelected
+                ? <Button variant="small" className="disabled" disabled>Added</Button>
+                : <Button onClick={() => addMod(item.targetId)} variant="small" color="green">Add</Button>;
+            }
+
+            return (
+              <div key={i} className="dep-item">
+                <ModImage src={iconUrl} width={40} height={40} className="dep-icon" alt="icon" />
+                <div className="dep-info">
+                  <p className="dep-source">
+                    {activeTab === 'conflict' ? 'Conflict w/' : 'Source:'}{' '}
+                    <span>{item.source}</span>
+                  </p>
+                  <p className="dep-target">{targetTitle}</p>
+                </div>
+                <div>{actionBtn}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Modal>
   );
 }

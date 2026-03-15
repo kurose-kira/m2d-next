@@ -2,10 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 import { useApp } from '@/contexts/AppContext';
+import Modal from '@/components/Modal/page';
+import Button from '@/components/Button/page';
 import Icon from '@/components/Icon/page';
 import circleAlertIconRaw from '@/assets/icons/circle-alert.svg';
 import infoIconRaw from '@/assets/icons/info.svg';
-import xIconRaw from '@/assets/icons/x.svg';
 
 export default function CustomDialog() {
   const { dialog, closeDialog } = useApp();
@@ -37,39 +38,37 @@ export default function CustomDialog() {
 
   const isConfirm = dialog.type === 'confirm';
 
+  const title = isConfirm
+    ? <><Icon svg={infoIconRaw} size={20} style={{ color: 'var(--accent-color)' }} /> Confirm</>
+    : <><Icon svg={circleAlertIconRaw} size={20} style={{ color: 'var(--primary-color)' }} /> Notice</>;
+
+  const footer = (
+    <>
+      {isConfirm && (
+        <Button onClick={() => closeDialog(false)} variant="secondary">
+          Cancel
+        </Button>
+      )}
+      <Button
+        ref={okRef}
+        onClick={() => closeDialog(isConfirm ? true : undefined)}
+        variant="primary"
+        className="dialog-ok-btn"
+      >
+        OK
+      </Button>
+    </>
+  );
+
   return (
-    <div className="modal-overlay" style={{ zIndex: 200 }}>
-      <div className="modal-container dialog-container" role="dialog" aria-modal="true">
-        <div className="modal-header">
-          <h3 className="modal-title">
-            {isConfirm
-              ? <><Icon svg={infoIconRaw} size={20} style={{ color: 'var(--accent-color)' }} /> Confirm</>
-              : <><Icon svg={circleAlertIconRaw} size={20} style={{ color: 'var(--primary-color)' }} /> Notice</>
-            }
-          </h3>
-          <button onClick={() => closeDialog(isConfirm ? false : undefined)} className="btn-close-modal">
-            <Icon svg={xIconRaw} size={20} />
-          </button>
-        </div>
-        <div className="modal-body">
-          <p className="dialog-message">{dialog.message}</p>
-        </div>
-        <div className="modal-footer">
-          {isConfirm && (
-            <button onClick={() => closeDialog(false)} className="btn-secondary">
-              Cancel
-            </button>
-          )}
-          <button
-            ref={okRef}
-            onClick={() => closeDialog(isConfirm ? true : undefined)}
-            className="btn-primary dialog-ok-btn"
-          >
-            OK
-          </button>
-        </div>
-      </div>
-    </div>
+    <Modal
+      onClose={() => closeDialog(isConfirm ? false : undefined)}
+      title={title}
+      footer={footer}
+      className="dialog-container"
+      style={{ zIndex: 200 }}
+    >
+      <p className="dialog-message">{dialog.message}</p>
+    </Modal>
   );
 }
-

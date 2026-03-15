@@ -1,7 +1,8 @@
 'use client';
-
 import { useEffect, useRef, useState, useCallback } from 'react';
+
 import ModCard from '@/components/ModCard/page';
+import LoaderDots from '@/components/LoaderDots/page';
 import { API } from '@/utils/api';
 import { useApp } from '@/contexts/AppContext';
 
@@ -180,9 +181,7 @@ export default function ModList({ searchParams, isDesktop }: ModListProps) {
         className="loader-sentinel"
         style={{ opacity: loading ? 1 : 0 }}
       >
-        <div className="loader-dots">
-          <div /><div /><div /><div />
-        </div>
+        <LoaderDots />
       </div>
     </main>
   );

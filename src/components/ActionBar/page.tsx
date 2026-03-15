@@ -1,6 +1,7 @@
 'use client';
 
 import { useApp } from '@/contexts/AppContext';
+import Button from '@/components/Button/page';
 import Icon from '@/components/Icon/page';
 import shieldCheckIconRaw from '@/assets/icons/shield-check.svg';
 import downloadIconRaw from '@/assets/icons/download.svg';
@@ -24,12 +25,12 @@ export default function ActionBar({ onCheckDeps, onDownload }: ActionBarProps) {
         <button onClick={clearMods} className="btn-clear">Clear All</button>
       </div>
       <div className="action-buttons">
-        <button onClick={onCheckDeps} className="btn-action btn-check">
+        <Button onClick={onCheckDeps} variant="action" className="btn-check">
           <Icon svg={shieldCheckIconRaw} size={16} /> Check
-        </button>
-        <button onClick={onDownload} className="btn-action btn-download">
+        </Button>
+        <Button onClick={onDownload} variant="action" className="btn-download">
           <Icon svg={downloadIconRaw} size={16} /> Download
-        </button>
+        </Button>
       </div>
     </div>
   );
